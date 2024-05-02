@@ -66,7 +66,8 @@ typedef class Corpus
                     head->ptr->prev = NULL;
 
                     head->str = token;
-                    head->index = INDEX_ORIGINATES_AT_VALUE;
+                    // Incremented and assigned to each unique token
+                    head->index = INDEX_ORIGINATES_AT_VALUE; 
                     head->n_ptr = 1; 
                     head->ptr->l = l;
                     head->ptr->t = t;
@@ -74,8 +75,10 @@ typedef class Corpus
                     nt = nt + 1;
                     unt = unt + 1;
 
-                    index = INDEX_ORIGINATES_AT_VALUE;
-                    head->ptr->index = index;
+                    // Incremented for each token and then...
+                    index = INDEX_ORIGINATES_AT_VALUE; 
+                    // assigned to that token
+                    head->ptr->index = index; 
                 }
                 else 
                 {
@@ -87,6 +90,7 @@ typedef class Corpus
                         {                            
                             LINETOKENNUMBER_PTR current_linetoken = current_composite->ptr;
 
+                            // Reach last link
                             while (current_linetoken->next != NULL)
                             {
                                 current_linetoken = current_linetoken->next;
@@ -526,10 +530,10 @@ typedef class Corpus
         {
             if (head == NULL) 
             {
-                return 0;
+                return INDEX_NOT_FOUND_AT_VALUE;
             }
 
-            cc_tokenizer::string_character_traits<char>::size_type ret;
+            cc_tokenizer::string_character_traits<char>::size_type ret = INDEX_NOT_FOUND_AT_VALUE;
             COMPOSITE_PTR current_composite = head;
 
             do {

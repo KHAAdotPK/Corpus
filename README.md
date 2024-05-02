@@ -3,6 +3,7 @@
 This repository contains C++ code for managing corpora, including parsing CSV files and organizing text data.
 
 __Description__
+
 This repository implements a C/C++ class by the name of **corpus**. This class processes the textual data. The class includes methods for building the corpus from CSV data, accessing various statistics about the corpus (such as the number of lines, tokens, and unique tokens), and retrieving tokens by index or by string.
 
 The class uses a linked list data structure (COMPOSITE_PTR) to store information about each token in the corpus, including the token itself (str), its index, and the line and token numbers where it appears. Tokens are added to the corpus while parsing CSV data, and the class provides methods for retrieving tokens by their index or string value.
