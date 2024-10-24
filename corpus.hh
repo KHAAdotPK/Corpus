@@ -36,11 +36,14 @@ typedef class Corpus
     {
         parser.reset(LINES);
         parser.reset(TOKENS);
-
+        
         cc_tokenizer::string_character_traits<char>::size_type index = 0;
 
         // Iterate through each line of the CSV data
-        for (cc_tokenizer::string_character_traits<char>::size_type l = 1; l < numberOfLines(); l++)
+        /*
+            Changed followinf for loop, from l < numberOfLines() to l <= numberOfLines(). The prvious version of this expression left out the last line of the corpus
+         */
+        for (cc_tokenizer::string_character_traits<char>::size_type l = 1; l <= numberOfLines(); l++)
         {
             /*
                 Traverse each line   
@@ -54,6 +57,8 @@ typedef class Corpus
                     Traverse each token
                  */
                 cc_tokenizer::String<char> token = parser.get_token_by_number(t);
+
+                //std::cout<< token.c_str() << std::endl;
 
                 if (head == NULL)
                 {
@@ -151,8 +156,10 @@ typedef class Corpus
                    }
                 }                
             }            
-        }
 
+            //std::cout<< std::endl;
+        }
+       
         //std::cout<< "Index = " << index << std::endl;                                
     }
         
