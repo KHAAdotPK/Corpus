@@ -239,6 +239,12 @@ typedef class Corpus
     }
         
     public:
+
+        Corpus() : nl(0), nt(0), unt(0), head(NULL)
+        {
+
+        }
+
         Corpus(cc_tokenizer::csv_parser<cc_tokenizer::String<char>, char>& parser) : nt(0), unt(0), head(NULL)
         {            
             nl = parser.get_total_number_of_lines();
@@ -359,6 +365,21 @@ typedef class Corpus
         cc_tokenizer::string_character_traits<char>::size_type numberOfUniqueTokens(void) const
         {
             return unt;
+        }
+
+        Corpus& operator= (Corpus& ref)
+        {
+            if (&ref == this)
+            {
+                return *this;
+            }
+
+            head = ref.head;
+            nl = ref.nl;
+            nt = ref.nt;
+            unt = ref.unt;
+
+            return *this;
         }
 
         /*
@@ -557,6 +578,11 @@ typedef class Corpus
             } while (current_composite != NULL);
 
             return ret;         
+        }
+
+        cc_tokenizer::string_character_traits<char>::size_type get_number_of_lines(void)
+        {
+            return nl;
         }
 }CORPUS;
 
