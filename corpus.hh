@@ -32,6 +32,102 @@ typedef class Corpus
     // Unique number of tokens
     cc_tokenizer::string_character_traits<char>::size_type unt;
 
+    void build(Corpus& ref) throw (ala_exception)
+    {
+        if (!(head == NULL))
+        {
+            return;
+        }    
+
+        COMPOSITE_PTR current_composite = ref.head, local_current_composite = NULL;
+
+        while (current_composite != NULL)
+        {             
+            if (head == NULL)
+            {
+                try 
+                {
+                    head = reinterpret_cast<COMPOSITE_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(COMPOSITE)));
+                }
+                catch (std::bad_alloc& e)
+                {
+                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build() Error: ") + cc_tokenizer::String<char>(e.what()));
+                }
+                catch (std::length_error& e)
+                {
+                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build() Error: ") + cc_tokenizer::String<char>(e.what()));    
+                }
+
+                head->prev = NULL;
+                local_current_composite = head;                                
+            }
+            else 
+            {               
+                 try 
+                {
+                    local_current_composite->next = reinterpret_cast<COMPOSITE_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(COMPOSITE)));
+                }
+                catch (std::bad_alloc& e)
+                {
+                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build() Error: ") + cc_tokenizer::String<char>(e.what()));
+                }
+                catch (std::length_error& e)
+                {
+                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build() Error: ") + cc_tokenizer::String<char>(e.what()));    
+                }
+
+                local_current_composite->next->prev = local_current_composite;
+                local_current_composite = local_current_composite->next;                
+            }
+
+            // Fill local_current_composite
+            local_current_composite->index = current_composite->index;
+            local_current_composite->next = NULL;
+            local_current_composite->probability = current_composite->probability;
+            local_current_composite->n_ptr = current_composite->n_ptr;
+            local_current_composite->ptr = NULL;
+            local_current_composite->str = current_composite->str;
+
+            LINETOKENNUMBER_PTR current_linetoken = current_composite->ptr, local_current_linetoken;
+            while (current_linetoken != NULL) 
+            {   
+                try
+                {   if (local_current_composite->ptr == NULL)
+                    {
+                        local_current_linetoken = reinterpret_cast<LINETOKENNUMBER_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(LINETOKENNUMBER)));
+                        local_current_composite->ptr = local_current_linetoken;
+
+                        local_current_linetoken->prev = NULL;
+                    }
+                    else
+                    {
+                        local_current_linetoken->next = reinterpret_cast<LINETOKENNUMBER_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(LINETOKENNUMBER)));
+                        local_current_linetoken->next->prev = local_current_linetoken;
+
+                        local_current_linetoken = local_current_linetoken->next;
+                    }
+                }
+                catch (std::bad_alloc& e)
+                {
+                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build() Error: ") + cc_tokenizer::String<char>(e.what()));
+                }
+                catch (std::length_error& e)
+                {
+                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build() Error: ") + cc_tokenizer::String<char>(e.what()));    
+                }
+
+                local_current_linetoken->next = NULL;
+                local_current_linetoken->index = current_linetoken->index;
+                local_current_linetoken->l = current_linetoken->l;
+                local_current_linetoken->t = current_linetoken->t;
+                                                                                         
+                current_linetoken = current_linetoken->next;
+            }
+            
+            current_composite = current_composite->next;
+        }
+    }
+
     void build(cc_tokenizer::csv_parser<cc_tokenizer::String<char>, char> &parser) 
     {
         parser.reset(LINES);
@@ -374,10 +470,58 @@ typedef class Corpus
                 return *this;
             }
 
-            head = ref.head;
+            if (head != NULL)
+            {
+                COMPOSITE_PTR current_composite = head;
+
+                // Get tail
+                while (current_composite->next != NULL) 
+                {
+                    current_composite = current_composite->next;
+                }
+
+                current_composite = current_composite->prev;
+
+                while (current_composite != NULL)                
+                {
+                    LINETOKENNUMBER_PTR current_linetokennumber = current_composite->ptr;
+
+                    // Get tail
+                    while (current_linetokennumber->next != NULL)
+                    {
+                        current_linetokennumber = current_linetokennumber->next;
+                    }
+
+                    current_linetokennumber = current_linetokennumber->prev;
+
+                    while (current_linetokennumber != NULL)
+                    {
+                        cc_tokenizer::allocator<char>().deallocate(reinterpret_cast<char*>(current_linetokennumber->next));
+
+                        current_linetokennumber = current_linetokennumber->prev;
+                    }
+
+                    cc_tokenizer::allocator<char>().deallocate(reinterpret_cast<char*>(current_linetokennumber));
+
+                    cc_tokenizer::allocator<char>().deallocate(reinterpret_cast<char*>(current_composite->next));
+
+                    current_composite = current_composite->prev;
+                }
+
+                cc_tokenizer::allocator<char>().deallocate(reinterpret_cast<char*>(current_composite));
+            }
+
+            head = NULL;
             nl = ref.nl;
             nt = ref.nt;
             unt = ref.unt;
+            
+            build(ref);
+
+            /*head = ref.head;
+            nl = ref.nl;
+            nt = ref.nt;
+            unt = ref.unt;*/
 
             return *this;
         }
@@ -530,8 +674,7 @@ typedef class Corpus
 
             COMPOSITE_PTR current_composite = head;
 
-            do {
-
+            do {                
                 if (!current_composite->str.compare(str))
                 {
                     return current_composite->index;
