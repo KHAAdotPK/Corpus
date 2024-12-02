@@ -727,6 +727,35 @@ typedef class Corpus
         {
             return nl;
         }
+
+        COMPOSITE_PTR get_composite_ptr (cc_tokenizer::string_character_traits<char>::size_type index) 
+        {
+            COMPOSITE_PTR ret = NULL;
+
+            if (index > numberOfUniqueTokens() || head == NULL)
+            {
+
+                return ret;
+            }
+
+            //cc_tokenizer::String<char> ret;
+            COMPOSITE_PTR current_composite = head;
+
+            do
+            {
+                if (current_composite->index == index)
+                {
+                    ret = current_composite;
+
+                    break;
+                }
+
+                current_composite = current_composite->next;
+
+            } while (current_composite != NULL);
+
+            return ret; 
+        }
 }CORPUS;
 
 typedef Corpus* CORPUS_PTR;
