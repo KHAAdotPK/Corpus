@@ -728,32 +728,63 @@ typedef class Corpus
             return nl;
         }
 
-        COMPOSITE_PTR get_composite_ptr (cc_tokenizer::string_character_traits<char>::size_type index) 
+        COMPOSITE_PTR get_composite_ptr (cc_tokenizer::string_character_traits<char>::size_type index, bool redundency = false) 
         {
             COMPOSITE_PTR ret = NULL;
 
-            if (index > numberOfUniqueTokens() || head == NULL)
-            {
+            cc_tokenizer::string_character_traits<char>::size_type total_number_of_tokens = 0;
 
-                return ret;
+            if (!redundency)
+            {
+                total_number_of_tokens = numberOfUniqueTokens();
+            }
+            else
+            {
+                total_number_of_tokens = numberOfTokens();
             }
 
-            //cc_tokenizer::String<char> ret;
-            COMPOSITE_PTR current_composite = head;
+            if (!(index > total_number_of_tokens || head == NULL))
+            {                                        
+                COMPOSITE_PTR current_composite = head;
 
-            do
-            {
-                if (current_composite->index == index)
+                do
                 {
-                    ret = current_composite;
+                    if (!redundency)
+                    {
+                        if (current_composite->index == index)
+                        {
+                            ret = current_composite;
 
-                    break;
+                            break;
+                        } 
+                    }
+                    else
+                    {   
+                        cc_tokenizer::string_character_traits<char>::size_type i = current_composite->n_ptr;
+
+                        LINETOKENNUMBER_PTR linetokennumber_ptr = current_composite->ptr;
+
+                        for (cc_tokenizer::string_character_traits<char>::size_type i = 0; i < current_composite->n_ptr; i++)
+                        {
+                            if (linetokennumber_ptr->index == index)
+                            {
+                                ret = current_composite;
+
+                                break;
+                            }
+
+                            linetokennumber_ptr = linetokennumber_ptr->next;
+                        }
+
+                        if (ret != NULL)
+                        {
+                            break;
+                        }                    
+                    }
                 }
-
-                current_composite = current_composite->next;
-
-            } while (current_composite != NULL);
-
+                while (current_composite != NULL);
+            }
+                        
             return ret; 
         }
 }CORPUS;
