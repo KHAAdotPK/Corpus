@@ -728,7 +728,39 @@ typedef class Corpus
             return nl;
         }
 
-        COMPOSITE_PTR get_composite_ptr (cc_tokenizer::string_character_traits<char>::size_type index, bool redundency = false) 
+        LINETOKENNUMBER_PTR get_line_token_number(COMPOSITE_PTR ptr, cc_tokenizer::string_character_traits<char>::size_type i) throw (ala_exception)
+        {
+            if (ptr == NULL)
+            {
+                throw ala_exception("Corpus::get_line_token_number() Error: Composite pointer is NULL.");
+            }
+            
+            LINETOKENNUMBER_PTR linetokennumber_ptr = ptr->ptr;
+
+            if (linetokennumber_ptr->index != i)
+            {
+                linetokennumber_ptr = linetokennumber_ptr->next;
+
+                while (linetokennumber_ptr != NULL)
+                {
+                    if (linetokennumber_ptr->index == i)
+                    {                        
+                        break;
+                    }
+
+                    linetokennumber_ptr = linetokennumber_ptr->next;
+                }
+            }
+
+            if (linetokennumber_ptr == NULL)
+            {
+                throw ala_exception("Corpus::get_line_token_number() Error: Line token number pointer is NULL.");
+            }
+            
+            return linetokennumber_ptr;
+        }
+
+        COMPOSITE_PTR get_composite_ptr (cc_tokenizer::string_character_traits<char>::size_type index, bool redundency = false)  throw (ala_exception)
         {
             COMPOSITE_PTR ret = NULL;
 
@@ -780,11 +812,18 @@ typedef class Corpus
                         {
                             break;
                         }                    
-                    }
-                }
-                while (current_composite != NULL);
+                    } 
+
+                    current_composite = current_composite->next;
+                    
+                } while (current_composite != NULL);
             }
-                        
+
+            if (ret == NULL)
+            {
+                throw ala_exception("Corpus::get_composite_ptr() Error: Composite pointer is NULL.");
+            }
+
             return ret; 
         }
 }CORPUS;
