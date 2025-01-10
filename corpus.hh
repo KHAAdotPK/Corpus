@@ -688,6 +688,56 @@ typedef class Corpus
         }
 
         /*
+            Keep in mind that internally l, t both originate at 1 and index originates at INDEX_ORIGINATE_AT_VALUE
+
+            Overloads the function call operator to search for a token at a specific line and token position.
+            It iterates through the linked list of corpus_composite nodes to find the token.
+            Once the token is located, it searches through the linked list of line_token_number nodes to find the exact occurrence at the specified line and token position.
+            If no matching token is found, it returns a predefined constant indicating that the token was not found.
+            
+            @str: The token (word) to search for.
+            @l: Line number where the token is expected. Originates at 1.
+            @t: Token number within the line. Originates at 1.
+
+            Returns: The index of the token if found.
+                     INDEX_NOT_FOUND_AT_VALUE if the token is not found.
+         */
+        cc_tokenizer::string_character_traits<char>::size_type operator() (cc_tokenizer::String<char>& str, cc_tokenizer::string_character_traits<char>::size_type l, cc_tokenizer::string_character_traits<char>::size_type t)
+        {
+            if (head == NULL)
+            {
+                return INDEX_NOT_FOUND_AT_VALUE;
+            }
+
+            COMPOSITE_PTR current_composite = head;
+            LINETOKENNUMBER_PTR linetokennumber = NULL;
+
+            do 
+            {                
+                if (!current_composite->str.compare(str))
+                {
+                    linetokennumber = current_composite->ptr;
+                    break;
+                }
+
+                current_composite = current_composite->next;                
+            } 
+            while (current_composite != NULL);
+
+            while (linetokennumber) 
+            {
+                if (linetokennumber->l == l && linetokennumber->t == t)
+                {
+                    return linetokennumber->index;
+                }
+
+                linetokennumber = linetokennumber->next;
+            }
+            
+            return INDEX_NOT_FOUND_AT_VALUE;
+        }
+
+        /*
             Overloaded subscript operator for retrieving the index of a given token.
     
             Parameters:
@@ -728,6 +778,17 @@ typedef class Corpus
             return nl;
         }
 
+        /*
+            Retrieves a pointer to a line_token_number node based on the specified index from a given corpus_composite structure.
+            It starts with the first node in the linked list (ptr->ptr).
+            If the node's index does not match, it traverses the linked list until a match is found or the end of the list is reached.
+
+            @ptr: Pointer to a corpus_composite structure.
+            @i: Index of the desired token occurrence. The index originates at INDEX_ORIGINATE_AT_VALUE
+
+            Throws:
+            ala_exception if the provided corpus_composite pointer or the resulting line_token_number pointer is NULL.
+         */
         LINETOKENNUMBER_PTR get_line_token_number(COMPOSITE_PTR ptr, cc_tokenizer::string_character_traits<char>::size_type i) throw (ala_exception)
         {
             if (ptr == NULL)
@@ -760,6 +821,18 @@ typedef class Corpus
             return linetokennumber_ptr;
         }
 
+        /*
+            Retrieves a pointer to a corpus_composite structure based on the provided index. 
+            It handles both unique tokens and redundant occurrences
+
+            @index: Index of the token to search for. Index originate at INDEX_ORIGINATE_AT_VALUE
+            @redundency: Boolean flag indicating whether to consider redundant occurrences (true) or only unique tokens (false),
+                        If redundency is false, it searches for the unique token with the specified index.
+                        If redundency is true, it iterates through occurrences of the token in linked lists until the specified index is found
+
+            Throws:
+            ala_exception if no matching corpus_composite is found or if the list is empty.                    
+         */
         COMPOSITE_PTR get_composite_ptr (cc_tokenizer::string_character_traits<char>::size_type index, bool redundency = false)  throw (ala_exception)
         {
             COMPOSITE_PTR ret = NULL;

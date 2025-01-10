@@ -20,8 +20,15 @@
 #ifndef CORPUS_COMPOSITE_FOR_LM_HH
 #define CORPUS_COMPOSITE_FOR_LM_HH
 
+/*
+    Represents a linked list node that stores information about a token's occurrences in the text, including its position and index.
+ */
 typedef struct line_token_number 
 {
+    /*
+        A unique index that identifies each token occurrence, even if the same word appears multiple times.
+        Each occurrence receives a distinct index, incremented with each new token
+     */
     /*
         Index number which also takes into consideration that tokens in a text can be redundent, so each instance of a same word has a unique index
         This index is incremented at each token. 
@@ -30,11 +37,13 @@ typedef struct line_token_number
         This variable stores an index number that uniquely identifies each token occurrence within a text.
         It considers that tokens can be redundant, meaning the same word can appear multiple times.
         Each instance of the same word receives a unique index, and the index is incremented for each new token encountered
+        index originate at INDEX_ORIGINATE_AT_VALUE
      */
     cc_tokenizer::string_character_traits<char>::size_type index;
     /*
         Line number where the token appears in the text
         Token number within the specific line where it appears
+        Both originate at 1
      */
     cc_tokenizer::string_character_traits<char>::size_type l; 
     cc_tokenizer::string_character_traits<char>::size_type t;
@@ -45,6 +54,9 @@ typedef struct line_token_number
 
 typedef LINETOKENNUMBER* LINETOKENNUMBER_PTR;
 
+/*
+    Represents a composite structure for storing information about unique tokens in the text, including their frequency and occurrences.
+ */
 typedef struct corpus_composite
 {   
     /*
@@ -58,7 +70,7 @@ typedef struct corpus_composite
     cc_tokenizer::string_character_traits<char>::size_type index; 
 
     /*
-        This stores the total number of times the word pointed to by str appears in the text       
+        This stores the total number of times the word pointed to by str appears in the text, this value is atleast 1       
      */
     cc_tokenizer::string_character_traits<char>::size_type n_ptr; 
     /*
