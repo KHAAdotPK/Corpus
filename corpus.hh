@@ -688,7 +688,7 @@ typedef class Corpus
         }
 
         /*
-            Keep in mind that internally l, t both originate at 1 and index originates at INDEX_ORIGINATE_AT_VALUE
+            Keep in mind that internally l, t both originate at 1 and index(returned by this function) originates at INDEX_ORIGINATE_AT_VALUE
 
             Overloads the function call operator to search for a token at a specific line and token position.
             It iterates through the linked list of corpus_composite nodes to find the token.
