@@ -8,10 +8,8 @@
 
 #include "../ala_exception/ala_exception.hh"
 #include "../allocator/allocator.hh"
-#include "../argsv-cpp/lib/parser/parser.hh"
 #include "../csv/parser.hh"
 #include "../string/src/String.hh"
-#include "../sundry/cooked_read.hh"
 
 #include "composite.hh"
 

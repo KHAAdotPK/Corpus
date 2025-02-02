@@ -16,12 +16,18 @@ Overall, this class provides a basic framework for working with a corpus of text
 - `composite.hh`: Header file defining structures for composite data.
 - `corpus.hh`: Header file implementing a class for corpus management.
 
-### Dependencies 
+### Dependencies
+- [ala_exception](https://github.com/KHAAdotPK/ala_exception)
+- [allocator](https://github.com/KHAAdotPK/allocator)
+- [csv](https://github.com/KHAAdotPK/csv)
+- [String](https://github.com/KHAAdotPK/String)
+
 
 ### Usage
 To use this code, include the necessary header files in your C++ project and instantiate the `corpus` class with a CSV parser or text data.
 
 ```C++
+#include <iostream>
 #include "lib/corpus/corpus.hh"
 
 #define TEXT "giggles fill the air friends skipping hand in hand endless smiles blooming"
@@ -31,7 +37,10 @@ int main(int argc, char *argv[])
     corpus vocab(cc_tokenizer::String<char>(TEXT));
 
     std::cout<< "Number of lines = " << vocab.numberOfLines() << std::endl;
+
+    /* Redundency is allowed */
     std::cout<< "Number of tokens = " << vocab.numberOfTokens() << std::endl;
+    /* No redundency is allowed */    
     std::cout<< "Number of unique tokens = " << vocab.numberOfUniqueTokens() << std::endl;
 
     return 0;
@@ -40,5 +49,3 @@ int main(int argc, char *argv[])
 
 ### License
 This project is governed by a license, the details of which can be located in the accompanying file named 'LICENSE.' Please refer to this file for comprehensive information.
-
-
