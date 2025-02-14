@@ -686,7 +686,7 @@ typedef class Corpus
         }
 
         /*            
-            Keep in mind that internally, l and t both originate at INDEX_ORIGINATE_AT_VALUE, and index (returned by this function) originates at (vocabulary index(which originates at 0) + INDEX_ORIGINATE_AT_VALUE).
+            Keep in mind that internally, l and t both originate at 1, and index (returned by this function) originates at (vocabulary index(which originates at 0) + INDEX_ORIGINATE_AT_VALUE).
 
             Overloads the function call operator to search for a token at a specific line and token position.
             It iterates through the linked list of corpus_composite nodes to find the token.
@@ -891,8 +891,20 @@ typedef class Corpus
             }
 
             if (ret == NULL)
-            {
-                throw ala_exception("Corpus::get_composite_ptr() Error: Composite pointer is NULL.");
+            {   
+                if (!head) 
+                {
+                    throw ala_exception("Corpus::get_composite_ptr() Error: Internal vocabulary is not yet built.");  
+                }
+
+                if (redundency)
+                {                
+                    throw ala_exception("Corpus::get_composite_ptr() Error: Composite pointer is NULL. This likely occurred because the provided index exceeds the range of valid non-redundant indices maintained by the Corpus. Ensure the index is within bounds and corresponds to a valid token in the vocabulary.");
+                }
+                else
+                {
+                    throw ala_exception("Corpus::get_composite_ptr() Error: Composite pointer is NULL. This likely occurred because the provided index exceeds the range of valid redundant indices maintained by the Corpus. Ensure the index is within bounds and corresponds to a valid token in the vocabulary.");
+                }
             }
 
             return ret; 
