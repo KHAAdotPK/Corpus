@@ -4,7 +4,7 @@ This repository contains C++ code for managing corpora, including parsing CSV fi
 
 __Description__
 
-This repository implements a C/C++ class by the name of **corpus**. This class processes the textual data. The class includes methods for building the corpus from CSV data, accessing various statistics about the corpus (such as the number of lines, tokens, and unique tokens), and retrieving tokens by index or by string.
+This repository implements a C/C++ class by the name of **Corpus**. This class processes the textual data. The class includes methods for building the corpus from CSV data, accessing various statistics about the corpus (such as the number of lines, tokens, and unique tokens), and retrieving tokens by index or by string.
 
 The class uses a linked list data structure (COMPOSITE_PTR) to store information about each token in the corpus, including the token itself (str), its index, and the line and token numbers where it appears. Tokens are added to the corpus while parsing CSV data, and the class provides methods for retrieving tokens by their index or string value.
 
@@ -73,6 +73,14 @@ int main(int argc, char *argv[])
         while (text_parser.go_to_next_token() != cc_tokenizer::string_character_traits<char>::eof())        
         {
             // In Corpus class, the line and token numbers originate at 1.
+            
+            /*
+                The overloaded function call operator (`vocabulary()`) searches the entire vocabulary for the specified token,
+                taking into account both the token itself and its position (line and token number, which are 1-indexed).
+                Since the same token can appear at different positions in the corpus, this operator searches redundantly by default,
+                considering all occurrences of the token in the text.
+                It returns the index(indexed at INDEX_ORIGINATE_AT_VALUE) of the token if found, or `INDEX_NOT_FOUND_AT_VALUE` if the token is not present in the vocabulary.    
+             */
             cc_tokenizer::string_character_traits<char>::size_type index = vocabulary(text_parser.get_current_token(), text_parser.get_current_line_number(), text_parser.get_current_token_number());
 
             if (index != INDEX_NOT_FOUND_AT_VALUE)

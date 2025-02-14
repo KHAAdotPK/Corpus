@@ -29,6 +29,14 @@ int main(int argc, char *argv[])
         while (text_parser.go_to_next_token() != cc_tokenizer::string_character_traits<char>::eof())        
         {
             // In Corpus class, the line and token numbers originate at 1.
+            
+            /*
+                The overloaded function call operator (`vocabulary()`) searches the entire vocabulary for the specified token,
+                taking into account both the token itself and its position (line and token number, which are 1-indexed).
+                Since the same token can appear at different positions in the corpus, this operator searches redundantly by default,
+                considering all occurrences of the token in the text.
+                It returns the index(indexed at INDEX_ORIGINATE_AT_VALUE) of the token if found, or `INDEX_NOT_FOUND_AT_VALUE` if the token is not present in the vocabulary.    
+             */
             cc_tokenizer::string_character_traits<char>::size_type index = vocabulary(text_parser.get_current_token(), text_parser.get_current_line_number(), text_parser.get_current_token_number());
 
             if (index != INDEX_NOT_FOUND_AT_VALUE)
@@ -61,11 +69,7 @@ int main(int argc, char *argv[])
 
                     return 0;
                 }
-
-                /*
-                    This should've never happend if the following staement is true. 
-                    Without reduendency flag 
-                 */    
+                
                 if (composite->index != index)
                 {
                     std::cout<< vocabulary[composite->index].c_str() << " [" << vocabulary[index].c_str() << "] "; 
