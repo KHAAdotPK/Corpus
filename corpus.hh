@@ -17,7 +17,9 @@
 #define CORPUS_FOR_LM_HH
 
 #define INDEX_ORIGINATES_AT_VALUE  1
-#define INDEX_NOT_FOUND_AT_VALUE   0 
+#define INDEX_NOT_FOUND_AT_VALUE   0
+
+#define ALLOW_REDUNDANCY true
 
 typedef class Corpus 
 {
@@ -690,18 +692,22 @@ typedef class Corpus
 
             Overloads the function call operator to search for a token at a specific line and token position.
             It iterates through the linked list of corpus_composite nodes to find the token.
-            Once the token is located, it searches through the linked list of line_token_number nodes to find the exact occurrence at the specified line and token position.
+            Once the token is located, (If redundancy is allowed, then) it searches through the linked list of line_token_number nodes to find the exact occurrence at the specified line and token position.
             If no matching token is found, it returns a predefined constant indicating that the token was not found.
             
             @str: The token (word) to search for.
             @l: Line number where the token is expected. Originates at 1.
             @t: Token number within the line. Originates at 1.
+            @redundancy: Optional parameter indicating whether redundancy checks should be performed.
+                         Defaults to false.
 
             Returns: The index of the token if found.
                      INDEX_NOT_FOUND_AT_VALUE if the token is not found.
          */
-        cc_tokenizer::string_character_traits<char>::size_type operator() (cc_tokenizer::String<char>& str, cc_tokenizer::string_character_traits<char>::size_type l, cc_tokenizer::string_character_traits<char>::size_type t)
+        cc_tokenizer::string_character_traits<char>::size_type operator() (cc_tokenizer::String<char>& str, cc_tokenizer::string_character_traits<char>::size_type l, cc_tokenizer::string_character_traits<char>::size_type t, bool redundancy = ALLOW_REDUNDANCY)
         {
+            cc_tokenizer::string_character_traits<char>::size_type ret = INDEX_NOT_FOUND_AT_VALUE;
+
             if (head == NULL)
             {
                 return INDEX_NOT_FOUND_AT_VALUE;
@@ -715,6 +721,9 @@ typedef class Corpus
                 if (!current_composite->str.compare(str))
                 {
                     linetokennumber = current_composite->ptr;
+
+                    ret = current_composite->index;
+
                     break;
                 }
 
@@ -722,17 +731,30 @@ typedef class Corpus
             } 
             while (current_composite != NULL);
 
+            if (redundancy != ALLOW_REDUNDANCY /*&& linetokennumber == NULL*/)
+            {
+                /*if (linetokennumber->l == l && linetokennumber->t == t)*/
+                //{
+                    return ret;
+                //}
+
+                /*linetokennumber = linetokennumber->next;*/
+
+                /*ret = INDEX_NOT_FOUND_AT_VALUE;*/                 
+            }
+
             while (linetokennumber) 
             {
                 if (linetokennumber->l == l && linetokennumber->t == t)
                 {
-                    return linetokennumber->index;
+                    ret = linetokennumber->index;
+                    break;
                 }
 
                 linetokennumber = linetokennumber->next;
             }
-            
-            return INDEX_NOT_FOUND_AT_VALUE;
+                                                             
+            return ret;
         }
 
         /*
