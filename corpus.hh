@@ -812,6 +812,8 @@ typedef class Corpus
 
             Throws:
             ala_exception if the provided corpus_composite pointer or the resulting line_token_number pointer is NULL.
+
+            The returned pointer is sent as a reference, the receiver does not own the returned pointer
          */
         LINETOKENNUMBER_PTR get_line_token_number(COMPOSITE_PTR ptr, cc_tokenizer::string_character_traits<char>::size_type i) throw (ala_exception)
         {
@@ -855,7 +857,9 @@ typedef class Corpus
                         If redundency is true, it iterates through occurrences of the token in linked lists until the specified index is found
 
             Throws:
-            ala_exception if no matching corpus_composite is found or if the list is empty.                    
+            ala_exception if no matching corpus_composite is found or if the list is empty.
+            
+            The returned pointer is sent as a reference, the receiver does not own the returned pointer
          */
         COMPOSITE_PTR get_composite_ptr (cc_tokenizer::string_character_traits<char>::size_type index, bool redundency = false)  throw (ala_exception)
         {
