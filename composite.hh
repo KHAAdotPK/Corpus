@@ -82,10 +82,17 @@ typedef struct corpus_composite
      */
     double probability; // Token/word probability   
 
+    cc_tokenizer::string_character_traits<char>::size_type get_frequency(void);
+
     struct corpus_composite* next;
     struct corpus_composite* prev;    
 } COMPOSITE;
 
 typedef COMPOSITE* COMPOSITE_PTR;
+
+cc_tokenizer::string_character_traits<char>::size_type COMPOSITE::get_frequency(void)
+{
+    return n_ptr;
+} 
 
 #endif

@@ -269,10 +269,10 @@ typedef class Corpus
         {
             throw ala_exception("Corpus::buildProbablities() Error: Vocabulary has not yet been built.");
         }
-
+        
         COMPOSITE_PTR current_composite = head;
         double sum_probabilities = 0.0; // Sum of probabilities. Used in the process of normalizing frequencies into probabilities.
-
+        
         do {
              // Calculate token/word frequencies              
              current_composite->probability = static_cast<double>(current_composite->n_ptr) / static_cast<double>(nt);
@@ -326,7 +326,7 @@ typedef class Corpus
         } while (current_composite != NULL);
 
         current_composite = head;
-
+        
         /*do {
 
             std::cout<< current_composite->probability << " -- ";
