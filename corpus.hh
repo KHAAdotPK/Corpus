@@ -28,6 +28,7 @@
 typedef class Corpus 
 {
     COMPOSITE_PTR head;
+    COMPOSITE_PTR tail;
 
     // Number of lines
     cc_tokenizer::string_character_traits<char>::size_type nl;
@@ -55,11 +56,11 @@ typedef class Corpus
                 }
                 catch (std::bad_alloc& e)
                 {
-                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build() Error: ") + cc_tokenizer::String<char>(e.what()));
+                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build(Corpus&) Error: ") + cc_tokenizer::String<char>(e.what()));
                 }
                 catch (std::length_error& e)
                 {
-                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build() Error: ") + cc_tokenizer::String<char>(e.what()));    
+                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build(Corpus&) Error: ") + cc_tokenizer::String<char>(e.what()));    
                 }
 
                 head->prev = NULL;
@@ -73,11 +74,11 @@ typedef class Corpus
                 }
                 catch (std::bad_alloc& e)
                 {
-                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build() Error: ") + cc_tokenizer::String<char>(e.what()));
+                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build(Corpus&) Error: ") + cc_tokenizer::String<char>(e.what()));
                 }
                 catch (std::length_error& e)
                 {
-                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build() Error: ") + cc_tokenizer::String<char>(e.what()));    
+                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build(Corpus&) Error: ") + cc_tokenizer::String<char>(e.what()));    
                 }
 
                 local_current_composite->next->prev = local_current_composite;
@@ -113,11 +114,11 @@ typedef class Corpus
                 }
                 catch (std::bad_alloc& e)
                 {
-                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build() Error: ") + cc_tokenizer::String<char>(e.what()));
+                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build(Corpus&) Error: ") + cc_tokenizer::String<char>(e.what()));
                 }
                 catch (std::length_error& e)
                 {
-                    throw ala_exception(cc_tokenizer::String<char>("Corpus::build() Error: ") + cc_tokenizer::String<char>(e.what()));    
+                    throw ala_exception(cc_tokenizer::String<char>("Corpus::buildCorpus& Error: ") + cc_tokenizer::String<char>(e.what()));    
                 }
 
                 local_current_linetoken->next = NULL;
@@ -137,127 +138,151 @@ typedef class Corpus
         parser.reset(LINES);
         parser.reset(TOKENS);
         
-        cc_tokenizer::string_character_traits<char>::size_type index = 0;
+        cc_tokenizer::string_character_traits<char>::size_type index = 0, l = 1, t = 1;
 
-        // Iterate through each line of the CSV data
-        /*
-            Changed followinf for loop, from l < numberOfLines() to l <= numberOfLines(). The prvious version of this expression left out the last line of the corpus
-         */
-        for (cc_tokenizer::string_character_traits<char>::size_type l = 1; l <= numberOfLines(); l++)
+        // Iterate through each line of the CSV data 
+        while (parser.go_to_next_line() != cc_tokenizer::string_character_traits<char>::eof())         
         {
             /*
                 Traverse each line   
              */
-            parser.get_line_by_number(l);
+            //parser.get_line_by_number(l);
 
-            // Iterate through each token on the current line
-            for (cc_tokenizer::string_character_traits<char>::size_type t = 1; t <= parser.get_total_number_of_tokens(); t++)
-            {
-                /*
-                    Traverse each token
-                 */
-                cc_tokenizer::String<char> token = parser.get_token_by_number(t);
+            std::cout<< "l = " << l << std::endl;
 
-                //std::cout<< token.c_str() << std::endl;
+                while (parser.go_to_next_token() != cc_tokenizer::string_character_traits<char>::eof())
+                // Iterate through each token on the current line
+                //for (cc_tokenizer::string_character_traits<char>::size_type t = 1; t <= parser.get_total_number_of_tokens(); t++)
+                {                                        
+                    //cc_tokenizer::String<char> token = parser.get_token_by_number(t);
+                    // Traverse each token
+                    cc_tokenizer::String<char> token = parser.get_current_token();
 
-                if (head == NULL)
-                {
-                    head = reinterpret_cast<COMPOSITE_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(COMPOSITE)));
-                    head->next = NULL;
-                    head->prev = NULL;
-                    head->probability = 0.0;
-                    head->ptr = reinterpret_cast<LINETOKENNUMBER_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(LINETOKENNUMBER)));                    
-                    head->ptr->next = NULL;
-                    head->ptr->prev = NULL;
+                    try 
+                    {
+                        if (head == NULL)
+                        {
+                            head = reinterpret_cast<COMPOSITE_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(COMPOSITE)));
+                            head->next = NULL;
+                            head->prev = NULL;
+                            head->probability = 0.0;
+                            head->ptr = reinterpret_cast<LINETOKENNUMBER_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(LINETOKENNUMBER)));                    
+                            head->ptr->next = NULL;
+                            head->ptr->prev = NULL;
 
-                    head->str = token;
-                    // Incremented and assigned to each unique token
-                    head->index = INDEX_ORIGINATES_AT_VALUE; 
-                    head->n_ptr = 1; 
-                    head->ptr->l = l;
-                    head->ptr->t = t;
-
-                    nt = nt + 1;
-                    unt = unt + 1;
-
-                    // Incremented for each token and then...
-                    index = INDEX_ORIGINATES_AT_VALUE; 
-                    // assigned to that token
-                    head->ptr->index = index; 
-                }
-                else 
-                {
-                   COMPOSITE_PTR current_composite = head;
-
-                   do
-                   {                        
-                        if (!current_composite->str.compare(token))
-                        {                            
-                            LINETOKENNUMBER_PTR current_linetoken = current_composite->ptr;
-
-                            // Reach last link
-                            while (current_linetoken->next != NULL)
-                            {
-                                current_linetoken = current_linetoken->next;
-                            }
-
-                            // Fill next here, it is old word
-                            current_linetoken->next = reinterpret_cast<LINETOKENNUMBER_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(LINETOKENNUMBER)));                    
-                            current_linetoken->next->next = NULL;
-                            current_linetoken->next->prev = current_linetoken;
-
-                            current_linetoken = current_linetoken->next;
-                            current_linetoken->l = l;
-                            current_linetoken->t = t;
-
-                            current_composite->n_ptr = current_composite->n_ptr + 1;
+                            head->str = token;
+                            // Incremented and assigned to each unique token
+                            head->index = INDEX_ORIGINATES_AT_VALUE; 
+                            head->n_ptr = 1; 
+                            head->ptr->l = l;
+                            head->ptr->t = t;
 
                             nt = nt + 1;
+                            unt = unt + 1;
 
-                            index = index + 1;
-                            current_linetoken->index = index;
+                            // Incremented for each token and then...
+                            index = INDEX_ORIGINATES_AT_VALUE; 
+                            // assigned to that token
+                            head->ptr->index = index; 
 
-                            break;
+                            tail = head;
                         }
-
-                        current_composite = current_composite->next;
-
-                   }  while (current_composite != NULL);
-
-                   if (current_composite == NULL)
-                   {
-                        current_composite = head;
-
-                        while (current_composite->next != NULL)
+                        else // Liked list atleast has one link 
                         {
-                            current_composite = current_composite->next;  
+                            COMPOSITE_PTR current_composite = head; // Start at the head of the linked list.
+                                                                   // Traverse the entire linked list to check if the current token already exists.
+                                                                   // If the token exists, append details about this occurrence as a new child node to the existing entry.
+                                                                   // Otherwise, continue to the end of the linked list,
+                                                                   // indicating the token was not found, and add a new entry for it.
+                            do
+                            {                        
+                                if (!current_composite->str.compare(token))
+                                {                            
+                                    LINETOKENNUMBER_PTR current_linetoken = current_composite->ptr;
+
+                                    // Reach last link
+                                    while (current_linetoken->next != NULL)
+                                    {
+                                        current_linetoken = current_linetoken->next;
+                                    }
+
+                                    // Fill next here, it is old word
+                                    current_linetoken->next = reinterpret_cast<LINETOKENNUMBER_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(LINETOKENNUMBER)));                    
+                                    current_linetoken->next->next = NULL;
+                                    current_linetoken->next->prev = current_linetoken;
+
+                                    current_linetoken = current_linetoken->next;
+                                    current_linetoken->l = l;
+                                    current_linetoken->t = t;
+
+                                    current_composite->n_ptr = current_composite->n_ptr + 1;
+
+                                    nt = nt + 1;
+
+                                    index = index + 1;
+                                    current_linetoken->index = index;
+
+                                    break;
+                                }
+
+                                current_composite = current_composite->next;
+
+                            }  while (current_composite != NULL);
+
+                            if (current_composite == NULL) // We have reached the end of the doubly linked list without finding the token.                                      
+                            {                              // Since this is the first occurrence of the token, create a new entry for it.                            
+                                current_composite = /*head */tail;  
+
+                                /*while (current_composite->next != NULL) // Go to the end of doubly linked list.
+                                {
+                                    current_composite = current_composite->next;  
+                                }*/
+
+                                // End of lnked list is found add new lnk for the first occurence of this token
+
+                                // Fill composite, it is new word.
+                                current_composite->next = reinterpret_cast<COMPOSITE_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(COMPOSITE)));
+                                current_composite->next->next = NULL;
+                                current_composite->next->prev = current_composite;
+                                current_composite->next->ptr = reinterpret_cast<LINETOKENNUMBER_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(LINETOKENNUMBER)));                    
+                                current_composite->next->ptr->next = NULL;
+                                current_composite->next->ptr->prev = NULL;
+
+                                current_composite->next->str = token;
+                                current_composite->next->index = current_composite->index + 1;
+                                current_composite->next->probability = 0.0;
+                                current_composite->next->n_ptr = 1;
+                                current_composite->next->ptr->l = l;
+                                current_composite->next->ptr->t = t;
+
+                                nt = nt + 1;
+                                unt = unt + 1;
+
+                                index = index + 1; 
+                                current_composite->next->ptr->index = index; 
+
+                                tail = current_composite->next;
+                            }
                         }
-
-                        // Fill composite, it is new word.
-                        current_composite->next = reinterpret_cast<COMPOSITE_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(COMPOSITE)));
-                        current_composite->next->next = NULL;
-                        current_composite->next->prev = current_composite;
-                        current_composite->next->ptr = reinterpret_cast<LINETOKENNUMBER_PTR>(cc_tokenizer::allocator<char>().allocate(sizeof(LINETOKENNUMBER)));                    
-                        current_composite->next->ptr->next = NULL;
-                        current_composite->next->ptr->prev = NULL;
-
-                        current_composite->next->str = token;
-                        current_composite->next->index = current_composite->index + 1;
-                        current_composite->next->probability = 0.0;
-                        current_composite->next->n_ptr = 1;
-                        current_composite->next->ptr->l = l;
-                        current_composite->next->ptr->t = t;
-
-                        nt = nt + 1;
-                        unt = unt + 1;
-
-                        index = index + 1; 
-                        current_composite->next->ptr->index = index;   
-                   }
-                }                
-            }            
-
-            //std::cout<< std::endl;
+                    }
+                    catch (std::bad_alloc& e)
+                    {
+                        // CRITICAL: Memory allocation failure - system should terminate immediately
+                        // NO cleanup performed - this is a fatal error requiring process exit
+                        throw ala_exception(cc_tokenizer::String<char>("Corpus::build(cc_tokenizer::csv_parser<cc_tokenizer::String<char>, char> &) Error: ") + cc_tokenizer::String<char>(e.what()));
+                    }
+                    catch (std::length_error& e)
+                    {
+                        // CRITICAL: Length constraint violation - system should terminate immediately
+                        // NO cleanup performed - this is a fatal error requiring process exit
+                        throw ala_exception(cc_tokenizer::String<char>("Corpus::build(cc_tokenizer::csv_parser<cc_tokenizer::String<char>, char> &) Error: ") + cc_tokenizer::String<char>(e.what()));    
+                    }    
+                    
+                    t = t + 1;
+                }
+           
+            t = 1;    
+            l = l + 1;
         }
        
         //std::cout<< "Index = " << index << std::endl;                                
@@ -340,13 +365,13 @@ typedef class Corpus
         
     public:
 
-        Corpus() : nl(0), nt(0), unt(0), head(NULL)
+        Corpus() : nl(0), nt(0), unt(0), head(NULL), tail(NULL)
         {
 
         }
 
-        Corpus(cc_tokenizer::csv_parser<cc_tokenizer::String<char>, char>& parser) : nt(0), unt(0), head(NULL)
-        {            
+        Corpus(cc_tokenizer::csv_parser<cc_tokenizer::String<char>, char>& parser) : nt(0), unt(0), head(NULL), tail(NULL)
+        {   
             nl = parser.get_total_number_of_lines();
 
             build(parser);
@@ -363,7 +388,7 @@ typedef class Corpus
             }
         }
 
-        Corpus(cc_tokenizer::String<char> &text) : nt(0), unt(0), head(NULL)
+        Corpus(cc_tokenizer::String<char> &text) : nt(0), unt(0), head(NULL), tail(NULL)
         {
             cc_tokenizer::csv_parser<cc_tokenizer::String<char>, char> parser(text);
 
