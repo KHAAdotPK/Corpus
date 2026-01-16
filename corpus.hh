@@ -148,7 +148,7 @@ typedef class Corpus
              */
             //parser.get_line_by_number(l);
 
-            std::cout<< "l = " << l << std::endl;
+            //std::cout<< "l = " << l << std::endl;
 
                 while (parser.go_to_next_token() != cc_tokenizer::string_character_traits<char>::eof())
                 // Iterate through each token on the current line
