@@ -9,7 +9,7 @@
 #include "../ala_exception/ala_exception.hh"
 #include "../allocator/allocator.hh"
 #include "../csv/parser.hh"
-#include "../string/src/String.hh"
+#include "../String/src/String.hh"
 
 #include "composite.hh"
 

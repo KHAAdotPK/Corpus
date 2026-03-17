@@ -6,7 +6,7 @@
 #include "../ala_exception/ala_exception.hh"
 #include "../allocator/allocator.hh"
 #include "../csv/parser.hh"
-#include "../string/src/String.hh"
+#include "../String/src/String.hh"
 
 /*
      These structs represent a data structure for storing information about tokens (words) in a text corpus.
